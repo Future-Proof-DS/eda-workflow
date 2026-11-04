@@ -24,7 +24,10 @@ data_path = os.path.join("data", "cafe_sales.csv")
 # Initialize OpenAI model
 llm = ChatOpenAI(
     model="gpt-4o-mini",
-    temperature=0
+    temperature=0,
+    max_tokens=1000,
+    timeout=90,
+    max_retries=0
 )
 
 # Create EDA workflow with the model
