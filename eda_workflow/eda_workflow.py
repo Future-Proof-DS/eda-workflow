@@ -76,16 +76,18 @@ def classify_column_roles(df: pd.DataFrame) -> dict:
         
         if words & ID_WORDS:
             roles["id"].append(col)
-        elif values.nunique() == len(df) and not pd.api.types.is_float_dtype(values):
-            roles["id"].append(col)
         elif words & DATE_WORDS:
             roles["date"].append(col)
         elif is_numeric and (words & RATE_WORDS or values.between(0, 1).all()):
             roles["rate"].append(col)
+        elif not is_numeric and (
+            pd.to_datetime(values, errors="coerce", format="mixed").notna().mean() > 0.8
+        ):
+            roles["date"].append(col)
+        elif values.nunique() == len(df) and not pd.api.types.is_float_dtype(values):
+            roles["id"].append(col)
         elif is_numeric:
             roles["measure"].append(col)
-        elif pd.to_datetime(values, errors="coerce", format="mixed").notna().mean() > 0.8:
-            roles["date"].append(col)
         elif values.nunique() <= MAX_CATEGORIES:
             roles["categorical"].append(col)
         else:
