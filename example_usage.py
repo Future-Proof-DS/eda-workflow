@@ -59,7 +59,7 @@ for step_key, step_title in analysis_steps:
     print("=" * 60)
     print(f"{step_title.upper()}")
     print("=" * 60)
-    
+
     # Show results
     if step_key in results:
         step_results = results[step_key]
@@ -68,9 +68,9 @@ for step_key, step_title in analysis_steps:
                 print(f"{key}: {type(value).__name__} with {len(value)} items")
             else:
                 print(f"{key}: {value}")
-    
+
     # Show observations
-    print(f"\nObservations:")
+    print("\nObservations:")
     if step_key in observations and observations[step_key]:
         for obs in observations[step_key]:
             print(f"  • {obs}")
