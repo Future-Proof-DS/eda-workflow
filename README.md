@@ -1,4 +1,6 @@
-# EDA Workflow
+# EDA Workflow (Finished Version)
+
+> This is the finished copy of the project. `eda_workflow/eda_workflow.py` and `extract_observations_system.txt` here contain the worked solution. The student-facing starter is the separate [eda-workflow](https://github.com/Future-Proof-DS/eda-workflow) repo, so try the project there first and use this copy if you get stuck. It shows one good way to reach the goal, not the only one.
 
 An AI-powered exploratory data analysis workflow that performs consistent, first-pass analysis of datasets using LangChain and LangGraph. The workflow runs a fixed set of analysis tools, uses an LLM to extract observations after each step, and synthesizes findings into a summary with actionable recommendations.
 
@@ -10,6 +12,26 @@ The workflow follows a sequential process:
 3. **Synthesize**: Once all tools have run, the LLM summarizes findings and provides actionable recommendations
 
 This approach combines deterministic pandas-based analysis with LLM-powered interpretation.
+
+## Analysis Tools
+
+The workflow runs four tools, each followed by an observation step. The first two come with the starter. `compute_aggregates` and `analyze_relationships` were added to answer the next questions a data analyst would ask: where do the numbers sit, and which variables depend on each other?
+
+| Tool | What it produces | Why it is here |
+| --- | --- | --- |
+| `profile_dataset` | Shape, dtypes, column roles and summaries | Sets up everything after it. Column roles decide what later tools are allowed to do with each column. |
+| `analyze_missingness` | Nulls and sentinel values per column, complete rows | Nulls alone miss placeholder strings. In `cafe_sales.csv`, `Item` has no nulls but 620 rows (6.36%) are "unknown" or "error". |
+| `compute_aggregates` | Totals by category, rows left without a category, monthly trend, date spikes | Shows which groups matter and whether time looks healthy. The spike check flags 2023-02-06, with 491 rows against a typical 25. |
+| `analyze_relationships` | Correlations, derived columns, category strength | Correlation only covers numeric pairs and can't tell a real link from a formula. The derived column check shows `Total Spent` is `Quantity * Price Per Unit`, and that 1,166 rows break it. |
+
+### Design choices
+
+- **Column roles instead of dtypes**: pandas sees `Quantity` and `Price Per Unit` as the same kind of number, but only one of them makes sense to add up. `classify_column_roles` sorts columns into IDs, dates, measures, rates, categoricals and free text, using the column name first and the values second. Only measures get summed.
+- **Sentinels count as missing**: `mask_sentinels` turns placeholder strings into real missing values, so they are reported by `analyze_missingness` and never show up as categories in the later tools. The rows they leave out are still reported, so nothing disappears silently.
+- **Small tables for the LLM**: each tool returns a compact summary rather than the raw data, so the LLM reasons over numbers that pandas computed.
+- **Two kinds of observation**: the observation prompt labels each one `[Data quality]` or `[Analysis]`. Both go through the same prompt, so the label keeps "this data is wrong" apart from "this is what the data says" when the findings are synthesized.
+
+The name-based rules are a heuristic. They suit a first pass, but on a new dataset check `column_roles` in the profile output before trusting the aggregates.
 
 ## Setup
 
@@ -87,7 +109,7 @@ from eda_workflow.eda_workflow import EDAWorkflow
 load_dotenv()
 
 # Initialize the workflow with an LLM
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, max_tokens=1000, timeout=90, max_retries=0)
 workflow = EDAWorkflow(model=llm)
 
 # Run analysis on a dataset
