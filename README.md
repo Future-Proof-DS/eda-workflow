@@ -1,6 +1,6 @@
 # EDA Workflow (Finished Version)
 
-> This is the finished version of the Week 4 EDA workflow, here as a lifeline if you get stuck. It shows one good way to reach the goal, not the only one, so try it yourself first. The student-facing starter is [eda-workflow](https://github.com/Future-Proof-DS/eda-workflow).
+> This is the finished version of the Week 4 EDA workflow, here as a lifeline if you get stuck. It shows one good way to reach the goal, not the only one, so try it yourself first. The student-facing starter is [eda-workflow-start](https://github.com/Future-Proof-DS/eda-workflow-start).
 
 An AI-powered exploratory data analysis workflow that performs consistent, first-pass analysis of datasets using LangChain and LangGraph. The workflow runs a fixed set of analysis tools, uses an LLM to extract observations after each step, and synthesizes findings into a summary with actionable recommendations.
 
